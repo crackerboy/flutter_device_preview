@@ -260,7 +260,7 @@ class DevicePreviewState extends State<DevicePreview> {
     return MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Scaffold(
-            drawer: DevicePreviewMenu(),
+            endDrawer: DevicePreviewMenu(),
             body: DecoratedBox(
               decoration: widget.background,
               child: SafeArea(
@@ -282,7 +282,7 @@ class DevicePreviewState extends State<DevicePreview> {
                                   icon: Icon(Icons.settings),
                                   tooltip: 'Settings',
                                   onPressed: () {
-                                    Scaffold.of(context).openDrawer();
+                                    Scaffold.of(context).openEndDrawer();
                                   },
                                 )))
                   ],
