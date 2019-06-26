@@ -277,6 +277,7 @@ class DevicePreviewState extends State<DevicePreview> {
                     bottomBar,
                     Positioned(
                         top: 0,
+                        right: 0,
                         child: Builder(
                             builder: (context) => IconButton(
                                   icon: Icon(Icons.settings),
