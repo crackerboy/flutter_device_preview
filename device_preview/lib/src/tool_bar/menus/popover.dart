@@ -15,7 +15,7 @@ class Popover extends StatefulWidget {
   final IconData icon;
   final Size size;
   final PopoverContentBuilder builder;
-  final Offset offset;
+  final Rect rect;
 
   const Popover({
     Key key,
@@ -24,7 +24,7 @@ class Popover extends StatefulWidget {
     @required this.icon,
     @required this.child,
     @required this.builder,
-    this.offset = Offset.zero,
+    this.rect = Rect.zero,
   }) : super(key: key);
 
   static void open(BuildContext context) {
@@ -68,7 +68,7 @@ class _PopoverState extends State<Popover> {
               icon: widget.icon,
               child: widget.builder(context, close),
               size: widget.size ?? Size(280, 420),
-              startPosition: widget?.offset ?? _key.absolutePosition,
+              startPosition: widget?.rect ?? _key.absolutePosition,
             ),
           ),
         ),
