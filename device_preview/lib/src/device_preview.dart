@@ -460,6 +460,7 @@ class DevicePreviewState extends State<DevicePreview> {
               initialEntries: [
                 OverlayEntry(builder: (context) {
                   return MediaQueryObserver(
+                    data: MediaQuery.of(context).copyWith(size: dimens.biggest),
                     child: Builder(
                       builder: (context) {
                         final style = DevicePreviewTheme.of(context);
@@ -540,6 +541,8 @@ class DevicePreviewState extends State<DevicePreview> {
                         return Builder(
                           builder: (context) {
                             return MediaQueryObserver(
+                              data: MediaQuery.of(context)
+                                  .copyWith(size: dimens.biggest),
                               child: Flex(
                                 direction: isToolBarHorizontal
                                     ? Axis.vertical
