@@ -142,10 +142,7 @@ class DevicePreview extends StatefulWidget {
 
   /// A global builder that should be inserted into [WidgetApp]'s builder
   /// to simulated the simulated device screen and platform properties.
-  static Widget appBuilder(
-    BuildContext context,
-    Widget widget,
-  ) {
+  static Widget appBuilder(BuildContext context, Widget widget) {
     return MediaQuery(
       data: mediaQuery(context),
       child: Theme(
@@ -438,7 +435,12 @@ class DevicePreviewState extends State<DevicePreview> {
     if (oldWidget.enabled != widget.enabled) {
       setState(() {});
     }
-
+    if (oldWidget.style != widget.style) {
+      setState(() {});
+    }
+    if (oldWidget.data != widget.data) {
+      setState(() {});
+    }
     super.didUpdateWidget(oldWidget);
   }
 
@@ -447,142 +449,148 @@ class DevicePreviewState extends State<DevicePreview> {
     if (!widget.enabled) {
       return widget.builder(context);
     }
-    return DevicePreviewTheme(
-      style: style,
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: Overlay(
-          initialEntries: [
-            OverlayEntry(builder: (context) {
-              return MediaQueryObserver(
-                child: Builder(
-                  builder: (context) {
-                    final style = DevicePreviewTheme.of(context);
-                    Widget screen = Container(
-                      width: mediaQuery.size.width,
-                      height: mediaQuery.size.height,
-                      alignment: Alignment.center,
-                      child: ClipRect(
-                        child: MediaQuery(
-                          data: mediaQuery,
-                          child: Builder(
-                            builder: (context) => DevicePreviewProvider(
-                              mediaQuery: mediaQuery,
-                              key: _appKey,
-                              data: _data,
-                              availableDevices: availableDevices,
-                              child: widget.builder(context),
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-
-                    final isRotated = orientation == Orientation.landscape;
-                    final screenSize = isRotated || device.portrait == null
-                        ? device.landscape.size
-                        : device.portrait.size;
-
-                    screen = Stack(
-                      children: <Widget>[
-                        screen,
-                        Positioned(
-                          bottom: 0,
-                          left: 0,
-                          right: 0,
-                          child: AnimatedCrossFade(
-                            firstChild: SizedBox(),
-                            secondChild: VirtualKeyboard(
-                              height: VirtualKeyboard.minHeight +
-                                  mediaQuery.padding.bottom,
-                            ),
-                            crossFadeState: isVirtualKeyboardVisible
-                                ? CrossFadeState.showSecond
-                                : CrossFadeState.showFirst,
-                            duration: const Duration(milliseconds: 500),
-                          ),
-                        ),
-                      ],
-                    );
-
-                    var preview = _data.isFrameVisible
-                        ? device.frameBuilder(
-                            context,
-                            screen,
-                            screenSize,
-                            isRotated
-                                ? DeviceOrientation.landscape
-                                : DeviceOrientation.portrait,
-                          )
-                        : screen;
-
-                    preview = RepaintBoundary(
-                      key: _repaintKey,
-                      child: preview,
-                    );
-
-                    final isToolBarHorizontal = style.toolBar.position ==
-                            DevicePreviewToolBarPosition.bottom ||
-                        style.toolBar.position ==
-                            DevicePreviewToolBarPosition.top;
-
-                    final isToolBarDirectionInverted = style.toolBar.position ==
-                            DevicePreviewToolBarPosition.left ||
-                        style.toolBar.position ==
-                            DevicePreviewToolBarPosition.top;
-
-                    return Builder(
+    return LayoutBuilder(
+      builder: (context, dimens) => MediaQuery(
+        data: mediaQuery.copyWith(size: dimens.biggest),
+        child: DevicePreviewTheme(
+          style: style,
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Overlay(
+              initialEntries: [
+                OverlayEntry(builder: (context) {
+                  return MediaQueryObserver(
+                    child: Builder(
                       builder: (context) {
-                        return MediaQueryObserver(
-                          child: Flex(
-                            direction: isToolBarHorizontal
-                                ? Axis.vertical
-                                : Axis.horizontal,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: <Widget>[
-                              if (widget.isToolBarVisible &&
-                                  isToolBarDirectionInverted)
-                                isToolBarHorizontal
-                                    ? DevicePreviewHorizontalToolBar(
-                                        key: Key('HorizontalToolbar'),
-                                      )
-                                    : DevicePreviewVerticalToolBar(
-                                        key: Key('VerticalToolbar'),
-                                      ),
-                              Expanded(
-                                key: Key('Preview'),
-                                child: DecoratedBox(
-                                  decoration: style.background,
-                                  child: FittedBox(
-                                    fit: BoxFit.contain,
-                                    child: Builder(
-                                      key: Key(DevicePreview.of(context)
-                                          .device
-                                          .name),
-                                      builder: (context) => preview,
-                                    ),
-                                  ),
+                        final style = DevicePreviewTheme.of(context);
+                        Widget screen = Container(
+                          width: mediaQuery.size.width,
+                          height: mediaQuery.size.height,
+                          alignment: Alignment.center,
+                          child: ClipRect(
+                            child: MediaQuery(
+                              data: mediaQuery,
+                              child: Builder(
+                                builder: (context) => DevicePreviewProvider(
+                                  mediaQuery: mediaQuery,
+                                  key: _appKey,
+                                  data: _data,
+                                  availableDevices: availableDevices,
+                                  child: widget.builder(context),
                                 ),
                               ),
-                              if (widget.isToolBarVisible &&
-                                  !isToolBarDirectionInverted)
-                                isToolBarHorizontal
-                                    ? DevicePreviewHorizontalToolBar(
-                                        key: Key('HorizontalToolbar'),
-                                      )
-                                    : DevicePreviewVerticalToolBar(
-                                        key: Key('VerticalToolbar'),
-                                      ),
-                            ],
+                            ),
                           ),
                         );
+
+                        final isRotated = orientation == Orientation.landscape;
+                        final screenSize = isRotated || device.portrait == null
+                            ? device.landscape.size
+                            : device.portrait.size;
+
+                        screen = Stack(
+                          children: <Widget>[
+                            screen,
+                            Positioned(
+                              bottom: 0,
+                              left: 0,
+                              right: 0,
+                              child: AnimatedCrossFade(
+                                firstChild: SizedBox(),
+                                secondChild: VirtualKeyboard(
+                                  height: VirtualKeyboard.minHeight +
+                                      mediaQuery.padding.bottom,
+                                ),
+                                crossFadeState: isVirtualKeyboardVisible
+                                    ? CrossFadeState.showSecond
+                                    : CrossFadeState.showFirst,
+                                duration: const Duration(milliseconds: 500),
+                              ),
+                            ),
+                          ],
+                        );
+
+                        var preview = _data.isFrameVisible
+                            ? device.frameBuilder(
+                                context,
+                                screen,
+                                screenSize,
+                                isRotated
+                                    ? DeviceOrientation.landscape
+                                    : DeviceOrientation.portrait,
+                              )
+                            : screen;
+
+                        preview = RepaintBoundary(
+                          key: _repaintKey,
+                          child: preview,
+                        );
+
+                        final isToolBarHorizontal = style.toolBar.position ==
+                                DevicePreviewToolBarPosition.bottom ||
+                            style.toolBar.position ==
+                                DevicePreviewToolBarPosition.top;
+
+                        final isToolBarDirectionInverted =
+                            style.toolBar.position ==
+                                    DevicePreviewToolBarPosition.left ||
+                                style.toolBar.position ==
+                                    DevicePreviewToolBarPosition.top;
+
+                        return Builder(
+                          builder: (context) {
+                            return MediaQueryObserver(
+                              child: Flex(
+                                direction: isToolBarHorizontal
+                                    ? Axis.vertical
+                                    : Axis.horizontal,
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: <Widget>[
+                                  if (widget.isToolBarVisible &&
+                                      isToolBarDirectionInverted)
+                                    isToolBarHorizontal
+                                        ? DevicePreviewHorizontalToolBar(
+                                            key: Key('HorizontalToolbar'),
+                                          )
+                                        : DevicePreviewVerticalToolBar(
+                                            key: Key('VerticalToolbar'),
+                                          ),
+                                  Expanded(
+                                    key: Key('Preview'),
+                                    child: DecoratedBox(
+                                      decoration: style.background,
+                                      child: FittedBox(
+                                        fit: BoxFit.contain,
+                                        child: Builder(
+                                          key: Key(DevicePreview.of(context)
+                                              .device
+                                              .name),
+                                          builder: (context) => preview,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  if (widget.isToolBarVisible &&
+                                      !isToolBarDirectionInverted)
+                                    isToolBarHorizontal
+                                        ? DevicePreviewHorizontalToolBar(
+                                            key: Key('HorizontalToolbar'),
+                                          )
+                                        : DevicePreviewVerticalToolBar(
+                                            key: Key('VerticalToolbar'),
+                                          ),
+                                ],
+                              ),
+                            );
+                          },
+                        );
                       },
-                    );
-                  },
-                ),
-              );
-            }),
-          ],
+                    ),
+                  );
+                }),
+              ],
+            ),
+          ),
         ),
       ),
     );
